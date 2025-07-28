@@ -50,6 +50,15 @@ suite('tokenizer', function () {
     expectTokens('$abc', [t(IDENTIFIER, '$abc')]);
     expectTokens('a$', [t(IDENTIFIER, 'a$')]);
     expectTokens('a1', [t(IDENTIFIER, 'a1')]);
+
+    expectTokens('你好', [t(IDENTIFIER, '你好')]);
+    expectTokens('مرحبًا', [t(IDENTIFIER, 'مرحبًا')]);
+    expectTokens('hello', [t(IDENTIFIER, 'hello')]);
+    expectTokens('Привет', [t(IDENTIFIER, 'Привет')]);
+    expectTokens('こんにちは', [t(IDENTIFIER, 'こんにちは')]);
+    expectTokens('안녕하세요', [t(IDENTIFIER, '안녕하세요')]);
+    expectTokens('Γειά', [t(IDENTIFIER, 'Γειά')]);
+    expectTokens('שלום', [t(IDENTIFIER, 'שלום')]);
   });
 
   test('should tokenize two identifiers', function () {

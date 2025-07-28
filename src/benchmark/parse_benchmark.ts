@@ -9,6 +9,12 @@ suite
   .add('parse identifier', function () {
     return parse('foo', astFactory);
   })
+  .add('parse ascii identifier', function () {
+    return parse('hello + world + id + index + identifier', astFactory);
+  })
+  .add('parse unicode identifier', function () {
+    return parse('你好 + Привет + こんにちは + 안녕하세요 + Γειά', astFactory);
+  })
   .add('parse complex', function () {
     return parse('(a + b([1, 2, 3]) * c)', astFactory);
   })

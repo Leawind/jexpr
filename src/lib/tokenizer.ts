@@ -40,18 +40,22 @@ const _isWhitespace = (ch: number) =>
   ch === 13 /* \r */ ||
   ch === 32; /* space */
 
-// TODO(justinfagnani): allow code points > 127
+const REGEXP_ID_START = /\p{ID_Start}/u;
 const _isIdentOrKeywordStart = (ch: number) =>
-  ch === 95 /* _ */ ||
-  ch === 36 /* $ */ ||
-  // ch &= ~32 puts ch into the range [65,90] [A-Z] only if ch was already in
-  // the that range or in the range [97,122] [a-z]. We must mutate ch only after
-  // checking other characters, thus the comma operator.
-  ((ch &= ~32), 65 /* A */ <= ch && ch <= 90); /* Z */
+  ch < 127
+    ? ch === 95 /* _ */ ||
+      ch === 36 /* $ */ ||
+      ((ch &= ~32), 65 /* A */ <= ch && ch <= 90) /* Z */
+    : REGEXP_ID_START.test(String.fromCharCode(ch));
 
-// TODO(justinfagnani): allow code points > 127
+const REGEXP_ID_CONTINUE = /\p{ID_Continue}/u;
 const _isIdentifier = (ch: number) =>
-  _isIdentOrKeywordStart(ch) || _isNumber(ch);
+  ch <= 127
+    ? ch === 95 /* _ */ ||
+      ch === 36 /* $ */ ||
+      _isNumber(ch) ||
+      ((ch &= ~32), 65 /* A */ <= ch && ch <= 90) /* Z */
+    : REGEXP_ID_CONTINUE.test(String.fromCharCode(ch));
 
 const _isKeyword = (str: string) => KEYWORDS.indexOf(str) !== -1;
 
@@ -116,7 +120,7 @@ export class Tokenizer {
       this._advance(true);
     }
     if (_isQuote(this._next!)) return this._tokenizeString();
-    if (_isIdentOrKeywordStart(this._next!)) {
+    if (this._next && _isIdentOrKeywordStart(this._next)) {
       return this._tokenizeIdentOrKeyword();
     }
     if (_isNumber(this._next!)) return this._tokenizeNumber();
@@ -179,7 +183,7 @@ export class Tokenizer {
     // be called if _isIdentOrKeywordStart(this._next!) has returned true.
     do {
       this._advance();
-    } while (_isIdentifier(this._next!));
+    } while (this._next && _isIdentifier(this._next));
     const value = this._getValue();
     const kind = _isKeyword(value) ? Kind.KEYWORD : Kind.IDENTIFIER;
     return token(kind, value);
